@@ -9,7 +9,7 @@ module.exports = {
     output: {
         filename: 'app.js',
         path: path.resolve(__dirname, 'dist'),
-        publicPath: './',
+        publicPath: '/',
         assetModuleFilename: 'images/[name][ext][query]'
     },
     plugins: [
@@ -41,5 +41,15 @@ module.exports = {
         minimizer: [
             new CssMinimizerPlugin()
         ]
+    },
+    devServer: {
+        static: {
+            directory: path.join(__dirname, 'dist'),
+        },
+        compress: true,
+        port: 3000,
+        open: true,
+        hot: true,
+        liveReload: true
     }
 }
