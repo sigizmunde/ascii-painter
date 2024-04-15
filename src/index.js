@@ -2,24 +2,35 @@ import "./scss/styles.scss";
 import CanvasManipulator from "./utils/canvasManipulator";
 import createAWeightMap from "./utils/createAWeightMap";
 
-const canvas = document.getElementById("main-canvas");
-const manipulator = new CanvasManipulator(canvas);
+const ref = {};
+ref.reader = new FileReader();
+ref.image = new Image();
 
-const printRedNoise = () => {
-    const newPixels = [];
-    for (let y = 0; y < 400; y += 1) {
-        newPixels[y] = [];
-        for (let x = 0; x < 400; x += 1) {
-            newPixels[y].push({
-                r: Math.floor(Math.random() * 256),
-                g: Math.floor(Math.random() * 256 / 4),
-                b: Math.floor(Math.random() * 256 / 4),
-                alpha: 255,
-            });
-        }
+ref.imgInput = document.getElementById('imageInput');
+ref.imgInput.addEventListener('change', handleImageInput);
+
+ref.startBtn = document.getElementById('startBtn');
+ref.startBtn.addEventListener('click', handleClickStart);
+
+ref.canvas = document.getElementById("main-canvas");
+ref.manipulator = new CanvasManipulator(ref.canvas);
+
+function handleImageInput(e) {
+    if (e.target.files) {
+        const imageFile = e.target.files[0];
+        ref.reader.readAsDataURL(imageFile);
+        ref.reader.onloadend = function (e) {
+            ref.image.src = e.target.result;
+            ref.image.onload = function (ev) {
+                ref.canvas.width = ref.image.width;
+                ref.canvas.height = ref.image.height;
+                ref.manipulator = new CanvasManipulator(ref.canvas);
+                ref.manipulator.context.drawImage(ref.image, 0, 0);
+            };
+        };
     }
-    manipulator.setPixels(10, 10, newPixels);
 }
 
-const aWeightMapArial = createAWeightMap({ fontFace: 'Arial', fontSize: 12 });
-console.log(aWeightMapArial);
+function handleClickStart() {
+    ref.manipulator.paintWithAscii({ fontFace: 'courier', fontSize: Math.max(Math.ceil(Math.max(ref.manipulator.width, ref.manipulator.height) / 120), 8) });
+}

@@ -1,7 +1,14 @@
+import createAWeightMap, { clearCanvasContext, evaluateLightness, trimContrast } from "./createAWeightMap";
+
 export default class CanvasManipulator {
+    fontsCache = new Map();
+
     constructor(canvas) {
         this.canvas = canvas;
-        this.context = this.canvas.getContext("2d");
+    }
+
+    get context() {
+        return this.canvas.getContext("2d");
     }
 
     get width() {
@@ -68,6 +75,48 @@ export default class CanvasManipulator {
         if (font) {
             this.context.font = font;
         }
+        this.context.fillStyle = "black";
         this.context.fillText(text, x, y);
+    }
+
+    paintWithAscii({ fontFace, fontSize = 12 }) {
+        if (!this.fontsCache.get((`${fontSize}px ${fontFace}`))) {
+            const newWeightMap = createAWeightMap({ fontFace, fontSize });
+            this.fontsCache.set(`${fontSize}px ${fontFace}`, newWeightMap);
+        }
+
+        const { cellWidth,
+            cellHeight,
+            weights } = this.fontsCache.get(`${fontSize}px ${fontFace}`);
+
+        const asciiWidth = Math.floor(this.width / cellWidth);
+        const asciiHeight = Math.floor(this.height / cellHeight);
+
+        const pictureLightnessStats = {
+            minLightness: null,
+            maxLightness: null,
+            absoluteLightnessArray: []
+        };
+
+        for (let h = 0; h < asciiHeight; h += 1) {
+            for (let w = 0; w < asciiWidth; w += 1) {
+                const cellImageData = this.context.getImageData(w * cellWidth, h * cellHeight, cellWidth, cellHeight);
+                // here third parameter is unnecessary
+                evaluateLightness(cellImageData, pictureLightnessStats, null);
+            }
+        }
+
+        trimContrast(pictureLightnessStats);
+        
+        const { absoluteLightnessArray } = pictureLightnessStats;
+
+        clearCanvasContext(this.context, this.width, this.height);
+        this.context.fillStyle = "black";
+        this.context.font = `${fontSize}px ${fontFace}`;
+        absoluteLightnessArray.forEach((el, idx) => {
+            const x = (idx % asciiWidth) * cellWidth;
+            const y = (Math.floor(idx / asciiWidth) + 1) * cellHeight;
+            this.context.fillText(String.fromCharCode(weights.get(el[0])), x, y);
+        });
     }
 }

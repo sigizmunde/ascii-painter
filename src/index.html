@@ -10,9 +10,13 @@
 
 <body>
     <h1>Hello painter!</h1>
-    <canvas width="800" height="600" class="main-canvas" id="main-canvas">
-        You need to enable JavaScript to see the picture
-    </canvas>
+    <form><input type="file" accept="image/png, image/jpeg" id="imageInput" /></form>
+    <button type="button" id="startBtn">Convert to ASCII</button>
+    <div class="content">
+        <canvas width="800" height="600" class="main-canvas" id="main-canvas">
+            You need to enable JavaScript to see the picture
+        </canvas>
+    </div>
 </body>
 
 </html>
