@@ -1,22 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ASCII Converter</title>
     <script defer src="app.js"></script>
-</head>
+  </head>
 
-<body>
-    <h1>Hello painter!</h1>
-    <form><input type="file" accept="image/png, image/jpeg" id="imageInput" /></form>
-    <button type="button" id="startBtn">Convert to ASCII</button>
-    <div class="content">
-        <canvas width="800" height="600" class="main-canvas" id="main-canvas">
+  <body>
+    <div class="main-wrapper">
+      <main>
+        <h1>Image to ASCII Converter</h1>
+        <form><input type="file" accept="image/png, image/jpeg" id="imageInput" /></form>
+        <div class="buttons-block">
+          <button type="button" id="startBtn">Convert to ASCII</button>
+          <button type="button" id="startColorBtn">Convert to colorful ASCII</button>
+          <button type="button" id="restoreImgBtn">Restore image</button>
+        </div>
+        <div class="content">
+          <canvas width="800" height="600" class="main-canvas" id="main-canvas">
             You need to enable JavaScript to see the picture
-        </canvas>
+          </canvas>
+        </div>
+      </main>
     </div>
-</body>
-
+  </body>
 </html>

@@ -1,4 +1,40 @@
-#main-canvas {
+.main-wrapper {
+  padding: 1vh;
+}
+
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1vh;
+  font-family: Arial, sans-serif;
+
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  form {
+    input {
+      background-color: #1137af;
+      border: 1px white;
+      border-radius: 8px;
+      color: white;
+      padding: 4px 16px;
+    }
+  }
+
+  .buttons-block {
+    button {
+      background-color: #1137af;
+      border: 1px white;
+      border-radius: 8px;
+      color: white;
+      padding: 8px 16px;
+    }
+  }
+
+  #main-canvas {
     max-width: 92vw;
     max-height: 110vh;
+  }
 }
