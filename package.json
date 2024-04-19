@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack --mode production",
     "dev": "webpack serve --mode development --open",
-    "lint": "npx eslint . && npx stylelint \"**/*.{css,scss}\" --cache --cache-strategy content --fix",
+    "lint": "npx eslint . --cache --cache-strategy content --fix",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Illya Bondar @sigizmunde",
