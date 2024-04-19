@@ -1,8 +1,6 @@
-import createAWeightMap, {
-  clearCanvasContext,
-  evaluateLightness,
-  trimContrast,
-} from './createAWeightMap';
+import createAWeightMap from './createAWeightMap';
+import evaluateLightness from './evaluateLightness';
+import { clearCanvasContext, trimContrast } from './functions';
 
 export default class CanvasManipulator {
   fontsCache = new Map();
@@ -21,6 +19,19 @@ export default class CanvasManipulator {
 
   get height() {
     return this.canvas.height;
+  }
+
+  applySourceImage(image) {
+    this.canvas.width = image.width;
+    this.canvas.height = image.height;
+    this.context.drawImage(image, 0, 0);
+
+    // clone image from main canvas into virtual sourceCanvas
+    this.sourceCanvas = document.createElement('canvas');
+    this.sourceCanvas.width = this.width;
+    this.sourceCanvas.height = this.height;
+    this.sourceCtx = this.sourceCanvas.getContext('2d');
+    this.sourceCtx.drawImage(this.canvas, 0, 0);
   }
 
   getImageData() {
@@ -100,7 +111,9 @@ export default class CanvasManipulator {
     this.context.fillText(text, x, y);
   }
 
-  paintWithAscii({ fontFace, fontSize = 12 }) {
+  // colorArray [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]] is for CMY model
+  // colorArray [[1, 1, 1, 0]] is for black and white model
+  paintWithAscii({ fontFace, fontSize = 12, colorArray = [[1, 1, 1, 0]] }) {
     if (!this.fontsCache.get(`${fontSize}px ${fontFace}`)) {
       const newWeightMap = createAWeightMap({ fontFace, fontSize });
       this.fontsCache.set(`${fontSize}px ${fontFace}`, newWeightMap);
@@ -108,39 +121,53 @@ export default class CanvasManipulator {
 
     const { cellWidth, cellHeight, weights } = this.fontsCache.get(`${fontSize}px ${fontFace}`);
 
-    const asciiWidth = Math.floor(this.width / cellWidth);
-    const asciiHeight = Math.floor(this.height / cellHeight);
-
-    const pictureLightnessStats = {
-      minLightness: null,
-      maxLightness: null,
-      absoluteLightnessArray: [],
-    };
-
-    for (let h = 0; h < asciiHeight; h += 1) {
-      for (let w = 0; w < asciiWidth; w += 1) {
-        const cellImageData = this.context.getImageData(
-          w * cellWidth,
-          h * cellHeight,
-          cellWidth,
-          cellHeight,
-        );
-        // here third parameter is unnecessary
-        evaluateLightness(cellImageData, pictureLightnessStats, null);
-      }
-    }
-
-    trimContrast(pictureLightnessStats);
-
-    const { absoluteLightnessArray } = pictureLightnessStats;
-
     clearCanvasContext(this.context, this.width, this.height);
-    this.context.fillStyle = 'black';
-    this.context.font = `${fontSize}px ${fontFace}`;
-    absoluteLightnessArray.forEach((el, idx) => {
-      const x = (idx % asciiWidth) * cellWidth;
-      const y = (Math.floor(idx / asciiWidth) + 1) * cellHeight;
-      this.context.fillText(String.fromCharCode(weights.get(el[0])), x, y);
+
+    colorArray.forEach((colorMatrix, colorIndex, colorArr) => {
+      const asciiWidth = Math.floor(this.sourceCanvas.width / cellWidth);
+      const asciiHeight = Math.floor(this.sourceCanvas.height / cellHeight);
+
+      const pictureLightnessStats = {
+        minLightness: null,
+        maxLightness: null,
+        absoluteLightnessArray: [],
+      };
+
+      for (let h = 0; h < asciiHeight; h += 1) {
+        for (let w = 0; w < asciiWidth; w += 1) {
+          const cellImageData = this.sourceCtx.getImageData(
+            w * cellWidth,
+            h * cellHeight,
+            cellWidth,
+            cellHeight,
+          );
+          // here third parameter is unnecessary
+          evaluateLightness(cellImageData, pictureLightnessStats, null, colorMatrix);
+        }
+      }
+
+      trimContrast(pictureLightnessStats);
+
+      const { absoluteLightnessArray } = pictureLightnessStats;
+
+      this.context.globalCompositeOperation = 'multiply';
+      this.context.fillStyle = `rgba(${colorMatrix
+        .map((el, idx) => (idx !== 3 ? (1 - el) * 255 : 1 - el))
+        .join(', ')})`;
+      this.context.font = `${fontSize}px ${fontFace}`;
+      absoluteLightnessArray.forEach((el, idx) => {
+        const x = (idx % asciiWidth) * cellWidth + (cellWidth * colorIndex) / colorArr.length;
+        const y = (Math.floor(idx / asciiWidth) + 1) * cellHeight
+          + (cellHeight * colorIndex) / colorArr.length;
+        this.context.fillText(String.fromCharCode(weights.get(el[0])), x, y);
+      });
     });
+  }
+
+  restoreImage() {
+    if (this.sourceCanvas) {
+      this.context.globalCompositeOperation = 'source-over';
+      this.context.drawImage(this.sourceCanvas, 0, 0);
+    }
   }
 }

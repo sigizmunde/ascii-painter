@@ -5,6 +5,9 @@ const ref = {};
 ref.reader = new FileReader();
 ref.image = new Image();
 
+ref.canvas = document.getElementById('main-canvas');
+ref.manipulator = new CanvasManipulator(ref.canvas);
+
 function handleImageInput(e) {
   if (e.target.files) {
     const imageFile = e.target.files[0];
@@ -12,10 +15,7 @@ function handleImageInput(e) {
     ref.reader.onloadend = (e) => {
       ref.image.src = e.target.result;
       ref.image.onload = (ev) => {
-        ref.canvas.width = ref.image.width;
-        ref.canvas.height = ref.image.height;
-        ref.manipulator = new CanvasManipulator(ref.canvas);
-        ref.manipulator.context.drawImage(ref.image, 0, 0);
+        ref.manipulator.applySourceImage(ref.image);
       };
     };
   }
@@ -28,11 +28,30 @@ function handleClickStart() {
   });
 }
 
+function handleClickStartColor() {
+  ref.manipulator.paintWithAscii({
+    fontFace: 'courier',
+    fontSize: Math.max(Math.ceil(Math.max(ref.manipulator.width, ref.manipulator.height) / 120), 8),
+    colorArray: [
+      [1, 0, 0, 0],
+      [0, 1, 0, 0],
+      [0, 0, 1, 0],
+    ],
+  });
+}
+
+function handleClickRestore() {
+  ref.manipulator.restoreImage();
+}
+
 ref.imgInput = document.getElementById('imageInput');
 ref.imgInput.addEventListener('change', handleImageInput);
 
 ref.startBtn = document.getElementById('startBtn');
 ref.startBtn.addEventListener('click', handleClickStart);
 
-ref.canvas = document.getElementById('main-canvas');
-ref.manipulator = new CanvasManipulator(ref.canvas);
+ref.startBtn = document.getElementById('startColorBtn');
+ref.startBtn.addEventListener('click', handleClickStartColor);
+
+ref.startBtn = document.getElementById('restoreImgBtn');
+ref.startBtn.addEventListener('click', handleClickRestore);

@@ -1,30 +1,5 @@
-export function clearCanvasContext(context, width, height) {
-  context.fillStyle = 'white';
-  context.fillRect(0, 0, width, height);
-}
-
-// this function modifies lightnessStats object
-export function evaluateLightness(imageData, lightnessStats, identifier) {
-  const { minLightness, maxLightness, absoluteLightnessArray } = lightnessStats;
-  const absoluteLightness = imageData.data.reduce(
-    (acc, el, idx) => ((idx + 1) % 4 ? acc + el : acc),
-    0,
-  );
-  lightnessStats.minLightness = minLightness
-    ? Math.min(minLightness, absoluteLightness)
-    : absoluteLightness;
-  lightnessStats.maxLightness = maxLightness
-    ? Math.max(maxLightness, absoluteLightness)
-    : absoluteLightness;
-  absoluteLightnessArray.push([absoluteLightness, identifier]);
-}
-
-export function trimContrast(lightnessStats) {
-  const { minLightness, maxLightness, absoluteLightnessArray } = lightnessStats;
-  absoluteLightnessArray.forEach((el) => {
-    el[0] = Math.ceil(((el[0] - minLightness) / (maxLightness - minLightness)) * 255);
-  });
-}
+import evaluateLightness from './evaluateLightness';
+import { clearCanvasContext, trimContrast } from './functions';
 
 export default function createAWeightMap({ fontFace, fontSize = 12 }) {
   const newCanvas = document.createElement('canvas');
