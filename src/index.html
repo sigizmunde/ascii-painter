@@ -1,28 +1,29 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ASCII Converter</title>
-    <script defer src="app.js"></script>
-  </head>
 
-  <body>
-    <div class="main-wrapper">
-      <main>
-        <h1>Image to ASCII Converter</h1>
-        <form><input type="file" accept="image/png, image/jpeg" id="imageInput" /></form>
-        <div class="buttons-block">
-          <button type="button" id="startBtn">Convert to ASCII</button>
-          <button type="button" id="startColorBtn">Convert to colorful ASCII</button>
-          <button type="button" id="restoreImgBtn">Restore image</button>
-        </div>
-        <div class="content">
-          <canvas width="800" height="600" class="main-canvas" id="main-canvas">
-            You need to enable JavaScript to see the picture
-          </canvas>
-        </div>
-      </main>
-    </div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ASCII Converter</title>
+</head>
+
+<body>
+  <div class="main-wrapper">
+    <main>
+      <h1>Image to ASCII Converter</h1>
+      <form><input type="file" accept="image/png, image/jpeg" id="imageInput" /></form>
+      <div class="buttons-block">
+        <button type="button" id="startBtn">Convert to ASCII</button>
+        <button type="button" id="startColorBtn">Convert to colorful ASCII</button>
+        <button type="button" id="restoreImgBtn">Restore image</button>
+      </div>
+      <div class="content">
+        <canvas width="800" height="600" class="main-canvas" id="main-canvas">
+          You need to enable JavaScript to see the picture
+        </canvas>
+      </div>
+    </main>
+  </div>
+</body>
+
 </html>
