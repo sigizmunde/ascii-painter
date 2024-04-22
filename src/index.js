@@ -9,7 +9,7 @@ ref.canvas = document.getElementById('main-canvas');
 ref.manipulator = new CanvasManipulator(ref.canvas);
 
 function handleImageInput(e) {
-  if (e.target.files) {
+  if (e.target.files && e.target.files[0]) {
     const imageFile = e.target.files[0];
     ref.reader.readAsDataURL(imageFile);
     ref.reader.onloadend = (e) => {

@@ -2,6 +2,8 @@ import createAWeightMap from './createAWeightMap';
 import evaluateLightness from './evaluateLightness';
 import { clearCanvasContext, trimContrast } from './functions';
 
+const MAX_DIMENSION = 1600;
+
 export default class CanvasManipulator {
   fontsCache = new Map();
 
@@ -10,28 +12,37 @@ export default class CanvasManipulator {
   }
 
   get context() {
-    return this.canvas.getContext('2d');
+    return this.canvas?.getContext('2d');
   }
 
   get width() {
-    return this.canvas.width;
+    return this.canvas?.width || 0;
   }
 
   get height() {
-    return this.canvas.height;
+    return this.canvas?.height || 0;
   }
 
   applySourceImage(image) {
-    this.canvas.width = image.width;
-    this.canvas.height = image.height;
-    this.context.drawImage(image, 0, 0);
-
-    // clone image from main canvas into virtual sourceCanvas
+    // create a virtual canvas to store image
     this.sourceCanvas = document.createElement('canvas');
-    this.sourceCanvas.width = this.width;
-    this.sourceCanvas.height = this.height;
+    this.sourceCanvas.width = image.width;
+    this.sourceCanvas.height = image.height;
     this.sourceCtx = this.sourceCanvas.getContext('2d');
-    this.sourceCtx.drawImage(this.canvas, 0, 0);
+    this.sourceCtx.drawImage(image, 0, 0);
+
+    if (image.width > MAX_DIMENSION) {
+      // resize image on the virtual canvas
+      this.sourceCanvas.width = MAX_DIMENSION;
+      this.sourceCanvas.height = image.height * MAX_DIMENSION / image.width;
+      this.sourceCtx = this.sourceCanvas.getContext('2d');
+      this.sourceCtx.drawImage(image, 0, 0, MAX_DIMENSION, image.height * MAX_DIMENSION / image.width);
+    }
+
+    // clone image from virtual sourceCanvas into the main canvas
+    this.canvas.width = this.sourceCanvas.width;
+    this.canvas.height = this.sourceCanvas.height;
+    this.context.drawImage(this.sourceCanvas, 0, 0);
   }
 
   getImageData() {
@@ -114,6 +125,8 @@ export default class CanvasManipulator {
   // colorArray [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]] is for CMY model
   // colorArray [[1, 1, 1, 0]] is for black and white model
   paintWithAscii({ fontFace, fontSize = 12, colorArray = [[1, 1, 1, 0]] }) {
+    if (!this.canvas || !this.sourceCanvas) return;
+
     if (!this.fontsCache.get(`${fontSize}px ${fontFace}`)) {
       const newWeightMap = createAWeightMap({ fontFace, fontSize });
       this.fontsCache.set(`${fontSize}px ${fontFace}`, newWeightMap);
@@ -165,7 +178,7 @@ export default class CanvasManipulator {
   }
 
   restoreImage() {
-    if (this.sourceCanvas) {
+    if (this.sourceCanvas && this.context) {
       this.context.globalCompositeOperation = 'source-over';
       this.context.drawImage(this.sourceCanvas, 0, 0);
     }
